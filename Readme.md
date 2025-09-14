@@ -56,3 +56,6 @@ Documentation TMDb API
 
 TMDb
 
+# Resultat final :
+github.io:https://josue4231.github.io/film/
+
