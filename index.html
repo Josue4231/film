@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Films TMDb - Recherche et Catégories</title>
+<style>
+  body { font-family: Arial; background:#0d253f; color:#fff; margin:0; padding:20px; }
+  h1 { text-align:center; margin-bottom:20px; }
+  form { text-align:center; margin-bottom:20px; }
+  input, button { padding:10px; margin:5px; border-radius:5px; border:none; }
+  button { background:#01b4e4; color:#fff; cursor:pointer; }
+  .categories { text-align:center; margin-bottom:20px; }
+  .results { display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:20px; }
+  .movie { background:#1e3a5f; border-radius:10px; padding:10px; text-align:center; transition:0.2s; }
+  .movie:hover { transform:scale(1.03); }
+  .movie img { max-width:100%; border-radius:10px; }
+  .movie h3 { margin:10px 0 5px; }
+  .overview { font-size:0.85rem; color:#ddd; text-align:justify; margin-top:8px; }
+</style>
+</head>
+<body>
+
+<h1>Films 🎬 TMDb</h1>
+
+<form id="searchForm">
+  <input type="text" id="searchInput" placeholder="Rechercher un film...">
+  <button type="submit">Rechercher</button>
+</form>
+
+<div class="categories">
+  <button onclick="getPopular()">Films populaires</button>
+  <button onclick="getByGenre(27)">Horreur</button>
+  <button onclick="getByGenre(28)">Action</button>
+  <button onclick="getByGenre(35)">Comédie</button>
+  <button onclick="getByGenre(18)">Drame</button>
+  <button onclick="getByGenre(10749)">Romance</button>
+  <button onclick="getByGenre(878)">Science-Fiction</button>
+  <button onclick="getByGenre(16)">Animation</button>
+  <button onclick="getArtistes(200)">Artiste populaire</button>
+</div>
+
+<div class="results" id="results"></div>
+
+
+<script>
+const apiKey = "dbad40cbbe33db97f360d55b675242db"; // ta clé API
+
+document.getElementById('searchForm').addEventListener('submit', function(e){
+  e.preventDefault();
+  const query = document.getElementById('searchInput').value.trim();
+  if(query) searchMovies(query);
+});
+function displayArtists(artists){
+  const resDiv = document.getElementById('results');
+  resDiv.innerHTML = '';
+  
+  if(!artists || artists.length === 0){
+    resDiv.innerHTML = "<p>Aucun artiste trouvé.</p>";
+    return;
+  }
+
+  artists.forEach(artist => {
+    const photo = artist.profile_path 
+      ? `https://image.tmdb.org/t/p/w300${artist.profile_path}`
+      : 'https://via.placeholder.com/200x300?text=Pas+d%27image';
+
+    const div = document.createElement('div');
+    div.classList.add('movie'); // tu peux garder la même classe CSS
+    div.innerHTML = `
+      <img src="${photo}" alt="${artist.name}">
+      <h3>${artist.name}</h3>
+      <p>Connu pour :</p>
+      <ul>
+        ${artist.known_for.map(f => `<li>${f.title || f.name}</li>`).join('')}
+      </ul>
+    `;
+    resDiv.appendChild(div);
+  });
+}
+
+
+// Recherche par nom
+async function searchMovies(query){
+  const resDiv = document.getElementById('results');
+  resDiv.innerHTML = "<p>Chargement...</p>";
+  try{
+    const res = await fetch(`https://api.themoviedb.org/3/search/movie?api_key=${apiKey}&language=fr-FR&query=${encodeURIComponent(query)}`);
+    const data = await res.json();
+    displayResults(data.results);
+  }catch(e){
+    resDiv.innerHTML="<p>Erreur lors de la recherche.</p>";
+    console.error(e);
+  }
+}
+// Artistes populaires
+async function getArtistes(){
+  const resDiv = document.getElementById('results');
+  resDiv.innerHTML = "<p>Chargement...</p>";
+  try{
+    const res = await fetch(`https://api.themoviedb.org/3/person/popular?api_key=${apiKey}&language=fr-FR&page=1`);
+    const data = await res.json();
+    displayArtists(data.results); // <-- ici on utilise displayArtists
+  }catch(e){
+    resDiv.innerHTML="<p>Erreur lors du chargement.</p>";
+    console.error(e);
+  }
+}
+
+
+// Films populaires
+async function getPopular(){
+  const resDiv = document.getElementById('results');
+  resDiv.innerHTML = "<p>Chargement...</p>";
+  try{
+    const res = await fetch(`https://api.themoviedb.org/3/movie/popular?api_key=${apiKey}&language=fr-FR&page=1`);
+    const data = await res.json();
+    displayResults(data.results);
+  }catch(e){
+    resDiv.innerHTML="<p>Erreur lors du chargement.</p>";
+    console.error(e);
+  }
+}
+
+// Par genre
+async function getByGenre(genreId){
+  const resDiv = document.getElementById('results');
+  resDiv.innerHTML = "<p>Chargement...</p>";
+  try{
+    const res = await fetch(`https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&language=fr-FR&with_genres=${genreId}&sort_by=popularity.desc`);
+    const data = await res.json();
+    displayResults(data.results);
+  }catch(e){
+    resDiv.innerHTML="<p>Erreur lors du chargement.</p>";
+    console.error(e);
+  }
+}
+
+// Affichage des films
+function displayResults(movies){
+  const resDiv = document.getElementById('results');
+  resDiv.innerHTML = '';
+  if(!movies || movies.length===0){
+    resDiv.innerHTML="<p>Aucun film trouvé.</p>";
+    return;
+  }
+  movies.forEach(movie => {
+    const poster = movie.poster_path ? `https://image.tmdb.org/t/p/w500${movie.poster_path}` : 'https://via.placeholder.com/220x330?text=Pas+d%27image';
+    const div = document.createElement('div');
+    div.classList.add('movie');
+    div.innerHTML=`
+      <img src="${poster}" alt="${movie.title}">
+      <h3>${movie.title}</h3>
+      <p>Date : ${movie.release_date || 'Inconnue'}</p>
+      <p>Note : ${movie.vote_average || 'N/A'}</p>
+      <p class="overview">${movie.overview || 'Pas de description disponible.'}</p>
+    `;
+    resDiv.appendChild(div);
+  });
+}
+</script>
+
+</body>
+</html>
