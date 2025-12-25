@@ -76,6 +76,12 @@ const apiKey = "dbad40cbbe33db97f360d55b675242db";
 
 ---
 
+## Apercu du projet 
+
+<img width="1883" height="834" alt="image" src="https://github.com/user-attachments/assets/1c39ca60-49f2-477e-95f4-73366859b6eb" />
+
+---
+
 ## 🎯 Intention du projet
 
 Ce projet a été conçu pour :
