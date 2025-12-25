@@ -62,7 +62,7 @@ Ce projet met en avant mes compétences en **développement web moderne**, **int
 
 1. Cloner le dépôt :
    ```bash
-   git clone https://github.com/ton-username/tmdb-movie-explorer.git
+   git clone https://github.com/Josue4231/film.git
    ```
 2. Ouvrir le projet :
 ```
